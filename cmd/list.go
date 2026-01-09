@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/antonpodkur/remember/internal/storage"
+	"github.com/antonpodkur/remember/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -28,6 +29,6 @@ func runList(cmd *cobra.Command, args []string) {
 	}
 
 	for _, note := range notes {
-		fmt.Println(note)
+		fmt.Println(ui.NoteName.Render(note))
 	}
 }

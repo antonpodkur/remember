@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/antonpodkur/remember/internal/storage"
+	"github.com/antonpodkur/remember/internal/ui"
 	"github.com/sahilm/fuzzy"
 	"github.com/spf13/cobra"
 )
@@ -43,6 +44,6 @@ func runSearch(cmd *cobra.Command, args []string) {
 
 	matches := fuzzy.Find(query, notes)
 	for _, match := range matches {
-		fmt.Println(match.Str)
+		fmt.Println(ui.NoteName.Render(match.Str))
 	}
 }

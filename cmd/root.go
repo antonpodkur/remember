@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/antonpodkur/remember/internal/storage"
+	"github.com/antonpodkur/remember/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -60,7 +61,19 @@ func runRoot(cmd *cobra.Command, args []string) {
 			os.Exit(1)
 		}
 	} else {
-		content = readInteractive()
+		// Check if stdin is a terminal (interactive mode) or a pipe
+		if fileInfo, _ := os.Stdin.Stat(); (fileInfo.Mode() & os.ModeCharDevice) != 0 {
+			// Interactive terminal - use styled input
+			var ok bool
+			content, ok = ui.RunInteractiveInput(name)
+			if !ok {
+				fmt.Fprintln(os.Stderr, "Cancelled")
+				os.Exit(0)
+			}
+		} else {
+			// Piped input - read from stdin
+			content = readFromPipe()
+		}
 		if strings.TrimSpace(content) == "" {
 			fmt.Fprintln(os.Stderr, "Error: nothing to save")
 			os.Exit(1)
@@ -72,19 +85,14 @@ func runRoot(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	fmt.Printf("✓ Added to %s\n", name)
+	fmt.Printf("%s %s\n", ui.Success.Render("✓ Added to"), ui.NoteName.Render(name))
 }
 
-func readInteractive() string {
-	if fileInfo, _ := os.Stdin.Stat(); (fileInfo.Mode() & os.ModeCharDevice) != 0 {
-		fmt.Println("(Ctrl+D to save)")
-	}
-
+func readFromPipe() string {
 	var lines []string
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
-
 	return strings.Join(lines, "\n")
 }
