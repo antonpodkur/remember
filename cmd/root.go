@@ -64,7 +64,9 @@ func runRoot(cmd *cobra.Command, args []string) {
 }
 
 func readInteractive() string {
-	fmt.Println("(Ctrl+D to save)")
+	if fileInfo, _ := os.Stdin.Stat(); (fileInfo.Mode() & os.ModeCharDevice) != 0 {
+		fmt.Println("(Ctrl+D to save)")
+	}
 
 	var lines []string
 	scanner := bufio.NewScanner(os.Stdin)
