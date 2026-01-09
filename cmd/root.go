@@ -16,6 +16,18 @@ var rootCmd = &cobra.Command{
 	Long:  `remember is a minimal CLI for capturing notes. Append timestamped text to markdown files stored in ~/.remember/`,
 	Args:  cobra.MinimumNArgs(0),
 	Run:   runRoot,
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		if len(args) != 0 {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+
+		notes, err := storage.ListNotes()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+
+		return notes, cobra.ShellCompDirectiveNoFileComp
+	},
 }
 
 func Execute() error {
