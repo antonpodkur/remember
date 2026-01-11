@@ -27,6 +27,10 @@ var rootCmd = &cobra.Command{
 			return nil, cobra.ShellCompDirectiveError
 		}
 
+		if len(notes) > 0 {
+			notes = append([]string{"latest"}, notes...)
+		}
+
 		return notes, cobra.ShellCompDirectiveNoFileComp
 	},
 }
@@ -43,14 +47,24 @@ func runRoot(cmd *cobra.Command, args []string) {
 
 	name := args[0]
 
-	if storage.IsReservedName(name) {
-		fmt.Fprintf(os.Stderr, "Error: %s is a reserved command\n", name)
-		os.Exit(1)
-	}
+	// Handle "latest" as a special name that resolves to the most recently modified note
+	if name == "latest" {
+		latestName, err := storage.GetLatestNote()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+			os.Exit(1)
+		}
+		name = latestName
+	} else {
+		if storage.IsReservedName(name) {
+			fmt.Fprintf(os.Stderr, "Error: %s is a reserved command\n", name)
+			os.Exit(1)
+		}
 
-	if err := storage.ValidateName(name); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-		os.Exit(1)
+		if err := storage.ValidateName(name); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+			os.Exit(1)
+		}
 	}
 
 	var content string

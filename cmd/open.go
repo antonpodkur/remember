@@ -20,6 +20,9 @@ var openCmd = &cobra.Command{
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
 		notes, _ := storage.ListNotes()
+		if len(notes) > 0 {
+			notes = append([]string{"latest"}, notes...)
+		}
 		return notes, cobra.ShellCompDirectiveNoFileComp
 	},
 }
@@ -44,6 +47,17 @@ func runOpen(cmd *cobra.Command, args []string) {
 		}
 	} else {
 		name := args[0]
+
+		// Handle "latest" as a special name
+		if name == "latest" {
+			latestName, err := storage.GetLatestNote()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+				os.Exit(1)
+			}
+			name = latestName
+		}
+
 		if !storage.NoteExists(name) {
 			fmt.Fprintf(os.Stderr, "Error: note '%s' not found\n", name)
 			os.Exit(1)

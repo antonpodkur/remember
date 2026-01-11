@@ -16,6 +16,7 @@ var reservedNames = map[string]bool{
 	"search":     true,
 	"completion": true,
 	"help":       true,
+	"latest":     true,
 }
 
 var validNameRegex = regexp.MustCompile(`^[a-zA-Z0-9-]+$`)
@@ -82,6 +83,42 @@ func ListNotes() ([]string, error) {
 
 	sort.Strings(notes)
 	return notes, nil
+}
+
+func GetLatestNote() (string, error) {
+	dir := GetStorageDir()
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("no notes found")
+		}
+		return "", err
+	}
+
+	var latestName string
+	var latestTime time.Time
+
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
+			continue
+		}
+
+		info, err := entry.Info()
+		if err != nil {
+			continue
+		}
+
+		if latestName == "" || info.ModTime().After(latestTime) {
+			latestTime = info.ModTime()
+			latestName = strings.TrimSuffix(entry.Name(), ".md")
+		}
+	}
+
+	if latestName == "" {
+		return "", fmt.Errorf("no notes found")
+	}
+
+	return latestName, nil
 }
 
 func AppendToNote(name, content string) error {
