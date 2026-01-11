@@ -62,6 +62,19 @@ use redis for caching
 another thought
 ```
 
+## Claude Code Integration
+
+A Claude Code skill is included in `examples/remember-notes/`. Install it to enable note-taking during Claude Code sessions:
+
+```bash
+cp -r examples/remember-notes ~/.claude/skills/
+```
+
+Then Claude will respond to commands like:
+- "note this: found the bug in auth module"
+- "what's in my latest note?"
+- "show my ideas note"
+
 ## License
 
 GPL-3.0
