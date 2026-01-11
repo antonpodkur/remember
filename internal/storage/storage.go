@@ -17,6 +17,10 @@ var reservedNames = map[string]bool{
 	"completion": true,
 	"help":       true,
 	"latest":     true,
+	"export":     true,
+	"cat":        true,
+	"tail":       true,
+	"clipboard":  true,
 }
 
 var validNameRegex = regexp.MustCompile(`^[a-zA-Z0-9-]+$`)
@@ -144,4 +148,52 @@ func AppendToNote(name, content string) error {
 
 	_, err = f.WriteString(entry)
 	return err
+}
+
+type NoteEntry struct {
+	Timestamp string
+	Content   string
+}
+
+func ParseNoteEntries(name string) ([]NoteEntry, error) {
+	path := GetNotePath(name)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	content := string(data)
+	var entries []NoteEntry
+
+	headerRegex := regexp.MustCompile(`(?m)^## (\d{4}-\d{2}-\d{2} \d{2}:\d{2})\s*\n`)
+	matches := headerRegex.FindAllStringSubmatchIndex(content, -1)
+
+	for i, match := range matches {
+		timestamp := content[match[2]:match[3]]
+
+		contentStart := match[1]
+		var contentEnd int
+		if i+1 < len(matches) {
+			contentEnd = matches[i+1][0]
+		} else {
+			contentEnd = len(content)
+		}
+
+		entryContent := strings.TrimSpace(content[contentStart:contentEnd])
+		entries = append(entries, NoteEntry{
+			Timestamp: timestamp,
+			Content:   entryContent,
+		})
+	}
+
+	return entries, nil
+}
+
+func ReadNoteContent(name string) (string, error) {
+	path := GetNotePath(name)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
 }
