@@ -32,6 +32,20 @@ remember list
 
 # Fuzzy search
 remember search idea
+
+# View note without editor
+remember cat ideas
+remember cat latest
+
+# Show last N entries
+remember tail ideas -n 3
+
+# Export minified for LLM context
+remember export ideas
+# Output: 2024-01-15 14:30|use redis for caching
+
+# Append from clipboard
+remember clipboard ideas
 ```
 
 ## Storage
